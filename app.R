@@ -18,7 +18,7 @@ top_spotify_songs <- read.csv("universal_top_spotify_songs.csv")
 ui <- dashboardPage(
   
   # Application title
-  dashboardHeader(title = "Spotify Songs Analysis"),
+  dashboardHeader(title = "Spotify Summarized"),
   skin = "green",
   
   # Sidebar with tabs
