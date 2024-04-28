@@ -116,7 +116,7 @@ ui <- dashboardPage(
 
                 div(class = "col-sm-12",
                 div(class = "col-sm-2",
-                    textInput("artist_name", "Enter Artist's Name:")
+                    textInput("artist_name", "Enter Artist's Name:", value = "Diljit Dosanjh")
                 ),
                 div(class = "col-sm-2",
                     box(width = 12, height = 70,solidHeader = TRUE,
@@ -152,40 +152,13 @@ ui <- dashboardPage(
                         )
                     )
                 )
-
-                # div(class = "col-sm-12",
-                # div(class = "row",
-                #     div(class = "col-sm-4",
-                #         textInput("artist_name", "Enter Artist's Name:")
-                #     )
-                # ),
-                # div(class = "row",
-                #     div(class = "col-sm-4",
-                #         textOutput("followers_info")
-                #     ),
-                #     div(class = "col-sm-4",
-                #         textOutput("popularity_info")
-                #     ),
-                #     div(class = "col-sm-4",
-                #         textOutput("genres_info")
-                #     )
-                # )
           ),
-                # box(title = "Information for Artist", solidHeader = TRUE,
-                #     textInput("artist_name", "Enter Artist's Name:"),
-                #     textOutput("followers_info"),
-                #     textOutput("popularity_info"),
-                #     textOutput("genres_info")
-                # ),
                 box(title = "Total Number of Songs by Artist (top 10)", solidHeader = TRUE,
                     plotOutput("artist_song_counts_plot")
                 ),
                 box(title = "Number of Artists by Key", solidHeader = TRUE,
                     plotOutput("key_artist_counts_plot")
                 ),
-                # box(title = "Top 10 Artists by Followers", solidHeader = TRUE,
-                #     plotOutput("top_artists_plot")
-                # ),
                 box(title = "Top 10 Artists", solidHeader = TRUE,
                     selectInput("metric_selector", "Select Metric:",
                                 choices = c("followers", "popularity")),
@@ -359,21 +332,6 @@ server <- function(input, output) {
            x = "Key",
            y = "Number of Artists")
   })
-  
-  # top_artists <- artists %>%
-  #   arrange(desc(followers)) %>%
-  #   head(10)
-  
-  # # Render the bar chart of top 10 artists by followers
-  # output$top_artists_plot <- renderPlot({
-  #   ggplot(top_artists, aes(x = reorder(name, followers), y = followers)) +
-  #     geom_bar(stat = "identity", fill = "skyblue") +
-  #     geom_text(aes(label = followers), vjust = 0, color = "black") +
-  #     labs(title = "Top 10 Artists by Followers",
-  #          x = "Artist",
-  #          y = "Number of Followers") + coord_flip() +
-  #     theme(axis.text.x = element_blank())
-  # })
 
   observe({
     top_artists <- artists %>%
