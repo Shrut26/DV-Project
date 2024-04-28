@@ -185,7 +185,7 @@ ui <- dashboardPage(
                     checkboxGroupInput("keys", "Select Keys:",
                                        choices = c("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"),  # Display all keys as options
                                        inline = TRUE),
-                    actionButton("reset_keys", "Reset Keys"),
+                    
                     plotOutput("key_popularity")
                 ),
               )
@@ -220,7 +220,7 @@ ui <- dashboardPage(
 
 
 # Define server logic
-server <- function(input, output) {
+server <- function(input, output, session) {
 
   total_songs <- nrow(tracks)
   total_artists <- nrow(artists)
@@ -413,10 +413,7 @@ server <- function(input, output) {
            color = "Key") +
       theme_minimal()
   })
-  observeEvent(input$reset_keys, {
-    updateCheckboxGroupInput("keys", selected = NULL)
-  })
-
+  
   output$top_songs_plot <- renderPlot({
     # Convert input date to a suitable format
     selected_date <- paste(input$year_selector, input$month_selector, input$date_selector, sep = "-")
@@ -429,8 +426,8 @@ server <- function(input, output) {
       head(10)  # Select top 10 songs
       print(filtered_data)
 
-      # Truncate long song names
     filtered_data$name <- substr(filtered_data$name, 1, 50)
+      # Truncate long song names
 
     # Plot the top 10 songs on a vertical bar chart
     ggplot(filtered_data, aes(x = reorder(name,-daily_rank), y = popularity)) +
