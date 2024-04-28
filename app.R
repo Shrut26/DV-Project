@@ -194,10 +194,31 @@ ui <- dashboardPage(
       tabItem(tabName = "tab4",
               fluidRow(
                 box(title = "Top 10 Songs on Selected Date and Country", solidHeader = TRUE,
-                    selectInput("month_selector", "Select Month:", choices = formatC(1:12, width = 2, flag = "0")),
-                    selectInput("date_selector", "Select Date:", choices = formatC(1:31, width = 2, flag = "0")),
-                    selectInput("year_selector", "Select Year:", choices = c(2023, 2024)),
-                    selectInput("country_selector", "Select Country:", choices = c("ZA", "VN", "VE", "UY", "US", "UA", "TW", "TR", "TH", "SV", "SK", "SG", "SE", "SA", "RO", "PY", "PT", "PH", "PE", "PA", "NZ", "NO", "NL", "NI", "NG", "MY", "MX", "MA", "LV", "LU", "LT", "KZ", "KR", "JP", "IT", "IS", "IN", "IL", "IE", "ID", "HU", "HN", "HK", "GR", "GB", "FR", "FI", "ES", "EG", "EE", "EC", "DO", "DK", "DE", "CZ", "CR", "CO", "CL", "CH", "CA", "BY", "BR", "BO", "BG", "BE", "AU", "AT")
+                  #  selectInput("month_selector", "Select Month:", 
+                  #               choices = formatC(1:12, width = 2, flag = "0"),
+                  #               width = "30%"),
+                  #   selectInput("date_selector", "Select Date:", 
+                  #               choices = formatC(1:31, width = 2, flag = "0"),
+                  #               width = "30%"),
+                  fluidRow(
+                      column(6,
+                             selectInput("month_selector", "Select Month:", 
+                                         choices = formatC(1:12, width = 2, flag = "0"))
+                      ),
+                      column(6,
+                             selectInput("date_selector", "Select Date:", 
+                                         choices = formatC(1:31, width = 2, flag = "0"))
+                      )
+                    ),
+                  fluidRow(
+                      column(6,
+                              selectInput("year_selector", "Select Year:", choices = c(2023, 2024)),
+                      ),
+                      column(6,
+                             selectInput("country_selector", "Select Country:", choices = c("ZA", "VN", "VE", "UY", "US", "UA", "TW", "TR", "TH", "SV", "SK", "SG", "SE", "SA", "RO", "PY", "PT", "PH", "PE", "PA", "NZ", "NO", "NL", "NI", "NG", "MY", "MX", "MA", "LV", "LU", "LT", "KZ", "KR", "JP", "IT", "IS", "IN", "IL", "IE", "ID", "HU", "HN", "HK", "GR", "GB", "FR", "FI", "ES", "EG", "EE", "EC", "DO", "DK", "DE", "CZ", "CR", "CO", "CL", "CH", "CA", "BY", "BR", "BO", "BG", "BE", "AU", "AT")
+
+                      )
+                    ),
 ),
                     plotOutput("top_songs_plot")
                 ),
@@ -211,7 +232,18 @@ ui <- dashboardPage(
                     checkboxInput("explicit", "Include explicit tracks", TRUE),
                     plotOutput("trackPlot")
                     
-                    )
+                    ),
+                # Input box for song name
+                box(title = "Daily Rank Movement of a Song", solidHeader = TRUE,
+                    textInput("song_name_input", "Enter Song Name:"),
+                    numericInput("month_input", "Select Month (01-12):", min = 1, max = 12, value = 1),
+                    numericInput("year_input", "Select Year (2023-2024):", min = 2023, max = 2024, value = 2023),
+                    actionButton("apply_filter_btn", "Apply Filter")
+                ),
+                # Output plot for daily rank movement
+                box(title = "Daily Rank Movement", solidHeader = TRUE,
+                    plotOutput("daily_rank_movement_plot")
+                )
               )
       )
     )
@@ -256,7 +288,7 @@ server <- function(input, output, session) {
   output$popularity_over_time <- renderPlot({
     ggplot(tracks, aes(x = year, y = popularity)) +
       stat_summary(fun = "mean", geom = "line", color = "darkblue") +
-      labs(title = "Average Popularity Over Time",
+      labs(title = "",
            x = "Year",
            y = "Average Popularity") +
       scale_x_continuous(breaks = seq(min(tracks$year), max(tracks$year), by = 10))
@@ -283,8 +315,6 @@ server <- function(input, output, session) {
   output$genres_info <- renderText({
     artist <- artist_data()
     cleaned_genres <- gsub("[c()\\\"']", "", artist$genres)
-    # print(artist$genres)
-    # print(cleaned_genres)
     paste("Genres:", paste(cleaned_genres, collapse = ", "))
 })
 
@@ -328,7 +358,7 @@ server <- function(input, output, session) {
   output$key_artist_counts_plot <- renderPlot({
     ggplot(key_artist_counts, aes(x = key, y = artist_count)) +
       geom_bar(stat = "identity", fill = "skyblue") +
-      labs(title = "Number of Artists by Key",
+      labs(title = "",
            x = "Key",
            y = "Number of Artists")
   })
@@ -337,8 +367,6 @@ server <- function(input, output, session) {
     top_artists <- artists %>%
       arrange(desc(!!sym(input$metric_selector))) %>%
       head(10)
-    # print(input$metric_selector)
-    # print(top_artists)
     
     output$top_artists_plot <- renderPlot({
       ggplot(top_artists, aes(x = reorder(name, !!sym(input$metric_selector)), y = !!sym(input$metric_selector))) +
@@ -373,7 +401,7 @@ server <- function(input, output, session) {
   
   # Create a pie chart
   output$pie_chart <- renderPlot({
-    pie(top_10_genres$count, labels = paste(top_10_genres$genre, ": ", top_10_genres$count), main = "Distribution of Artists Among Top 10 Genres")
+    pie(top_10_genres$count, labels = paste(top_10_genres$genre, ": ", top_10_genres$count), main = "")
   })
   
   output$box_plot <- renderPlot({
@@ -407,7 +435,7 @@ server <- function(input, output, session) {
     ggplot(avg_popularity, aes(x = year, y = avg_popularity, color = key, group = key)) +
       geom_line() +
       scale_color_manual(values = key_colors) +  # Use manually specified colors
-      labs(title = "Popularity of Different Keys Over the Years",
+      labs(title = "",
            x = "Year",
            y = "Average Popularity",
            color = "Key") +
@@ -424,7 +452,6 @@ server <- function(input, output, session) {
              country == input$country_selector) %>%
       arrange(daily_rank) %>%
       head(10)  # Select top 10 songs
-      print(filtered_data)
 
     filtered_data$name <- substr(filtered_data$name, 1, 50)
       # Truncate long song names
@@ -464,6 +491,52 @@ server <- function(input, output, session) {
       labs(title = paste(input$param, "vs Popularity"),
            x = input$param, y = "Popularity") +
       theme_minimal()
+  })
+
+
+  filtered_song_data <- reactive({
+    req(input$song_name_input)
+    filter(top_spotify_songs, grepl(input$song_name_input, name, ignore.case = TRUE))
+  })
+  
+  filtered_month_data <- reactive({
+    req(input$apply_filter_btn)
+    filtered_data <- filtered_song_data()
+    filtered_data <- filter(filtered_data, 
+                            format(as.Date(snapshot_date), "%m") == sprintf("%02d", input$month_input) &
+                            format(as.Date(snapshot_date), "%Y") == as.character(input$year_input))
+    filtered_data
+  })
+  
+  output$daily_rank_movement_plot <- renderPlot({
+    req(input$song_name_input)
+    req(input$apply_filter_btn)
+    
+    filtered_data <- filtered_month_data()
+    
+    if (nrow(filtered_data) == 0) {
+      plot(1, type = "n", xlab = "", ylab = "", main = "No data available for the selected month and year.")
+    } else {
+      # Convert snapshot_date to Date object
+      filtered_data$snapshot_date <- as.Date(filtered_data$snapshot_date)
+      
+      # Create a sequence of dates for the selected month
+      dates <- seq(as.Date(paste(input$year_input, sprintf("%02d", input$month_input), "01", sep = "-")),
+                   by = "day",
+                   length.out = 32)[-1]  # Get dates from 1st to 31st
+      
+      # Plot the daily rank movement as a connected line graph
+      filtered_data <- arrange(filtered_data, snapshot_date)
+      ggplot(filtered_data, aes(x = snapshot_date, y = daily_rank)) +
+        geom_line(color = "blue") +
+         scale_x_date(breaks = seq(min(filtered_data$snapshot_date), max(filtered_data$snapshot_date), by = "5 days"),
+               date_labels = "%d") +  # Set x-axis ticks to show dates
+        labs(title = paste("Daily Rank Movement of", input$song_name_input),
+             x = "Date",
+             y = "Daily Rank", step=5) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    }
   })
   
   
